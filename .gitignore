@@ -1,0 +1,41 @@
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
+
+# Claude Code local files
+.claude/
+
+# Logs / temp
+*.log
+*.tmp
+*.bak
+tmp/
+temp/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies (if added later)
+vendor/
+node_modules/
+
+# Uploads / cache (if added later)
+uploads/
+cache/
+
+# Database dumps other than the main schema
+*.sql
+!dentalclinic.sql
