@@ -1,19 +1,18 @@
 @echo off
 setlocal
-title Dental Clinic - Launcher
+title SmileCare Dental - Launcher
 
 rem ===== Settings =====
 set "XAMPP=C:\xampp"
 set "PROJECT=%~dp0"
-set "APP=%PROJECT%dental"
-set "LINK=%XAMPP%\htdocs\dental"
-set "SQLFILE=%PROJECT%dentalclinic.sql"
-set "MYSQL=%XAMPP%\mysql\bin\mysql.exe"
+set "WEBROOT=%PROJECT%public"
+set "LINK=%XAMPP%\htdocs\dentalclinic"
+set "PHP=%XAMPP%\php\php.exe"
 set "MYSQLADMIN=%XAMPP%\mysql\bin\mysqladmin.exe"
-set "URL=http://localhost/dental/index.html"
+set "URL=http://localhost/dentalclinic/"
 
 echo ============================================
-echo   Dental Clinic Management System - Start
+echo   SmileCare Dental - Start
 echo ============================================
 echo.
 
@@ -44,42 +43,26 @@ goto waitmysql
 :mysqlok
 echo [OK] MySQL is ready.
 
-rem ===== 2. Database (import only the first time) =====
-"%MYSQL%" -u root -e "USE dentalclinic" >nul 2>&1
+rem ===== 2. Database + demo data (first run only) =====
+"%PHP%" "%PROJECT%database\install.php"
 if errorlevel 1 (
-    echo [..] Creating database 'dentalclinic' and importing data...
-    "%MYSQL%" -u root -e "CREATE DATABASE dentalclinic CHARACTER SET utf8mb4"
-    "%MYSQL%" -u root dentalclinic < "%SQLFILE%"
-    if errorlevel 1 (
-        echo [ERROR] Import failed.
-        pause & exit /b 1
-    )
-    echo [OK] Database imported.
-) else (
-    echo [OK] Database 'dentalclinic' already exists - keeping your data.
-)
-
-rem ===== 3. MySQL user admin/admin used by connect-mysql.php =====
-"%MYSQL%" -u root -e "CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED BY 'admin'; GRANT ALL PRIVILEGES ON dentalclinic.* TO 'admin'@'localhost'; FLUSH PRIVILEGES;"
-if errorlevel 1 (
-    echo [ERROR] Could not create MySQL user 'admin'.
+    echo [ERROR] Database setup failed. See the message above.
     pause & exit /b 1
 )
-echo [OK] MySQL user 'admin' ready.
 
-rem ===== 4. Link the project into htdocs (no copying, edits show up live) =====
+rem ===== 3. Link the public folder into htdocs =====
 if not exist "%LINK%" (
-    mklink /J "%LINK%" "%APP%" >nul
+    mklink /J "%LINK%" "%WEBROOT%" >nul
     if errorlevel 1 (
         echo [ERROR] Could not create link %LINK%
         pause & exit /b 1
     )
-    echo [OK] Linked %LINK% -^> %APP%
+    echo [OK] Linked %LINK% -^> %WEBROOT%
 ) else (
     echo [OK] %LINK% already exists.
 )
 
-rem ===== 5. Apache =====
+rem ===== 4. Apache =====
 tasklist /FI "IMAGENAME eq httpd.exe" | find /I "httpd.exe" >nul
 if errorlevel 1 (
     echo [..] Starting Apache...
@@ -101,13 +84,14 @@ goto waitapache
 :apacheok
 echo [OK] Apache is ready.
 
-rem ===== 6. Open browser =====
+rem ===== 5. Open browser =====
 echo.
 echo Opening %URL%
 echo.
-echo   Admin login  : sumitnarang76@gmail.com / sumit
-echo   Patient login: dileep@gmail.com / dileep
+echo   Admin   : admin@smilecare.test   / Admin@123
+echo   Dentist : dentist@smilecare.test / Dentist@123
+echo   Patient : patient@smilecare.test / Patient@123
 echo.
-echo Run stop.bat to shut down Apache and MySQL.
+echo Keep the minimized MySQL and Apache windows open. Run stop.bat to shut down.
 start "" "%URL%"
-timeout /t 8 >nul
+timeout /t 10 >nul
